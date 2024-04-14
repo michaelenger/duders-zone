@@ -38,6 +38,7 @@ const SHOW_IMAGES_PATH = 'static/shows/'
 
 // Video types to skip
 const UNWANTED_VIDEO_TYPES = [
+	"Events, Trailers",
 	"Trailers",
 	"Trailers, Exclude From Infinite",
 	"Trailers, Features",
