@@ -63,6 +63,15 @@
 			]
 		},
 		{
+			"id": "chucktowski",
+			"name": "Chuck Zimmerheld",
+			"image": "chucktowski.jpg",
+			"links": [
+				"https://www.twitch.tv/chucktowski",
+				"https://bsky.app/profile/chucktowski.com"
+			]
+		},
+		{
 			"id": "danryckert",
 			"name": "Dan Ryckert",
 			"image": "danr.png",
@@ -183,7 +192,9 @@
 			"id": "mattbodega",
 			"name": "Matt Kessler",
 			"image": "mattbodega.png",
-			"links": []
+			"links": [
+				"https://bsky.app/profile/mattbodega.bsky.social"
+			]
 		},
 		{
 			"id": "mmahardy",
@@ -218,7 +229,7 @@
 				"https://www.patreon.com/gamemess",
 				"https://www.twitch.tv/tolkoto",
 				"https://bsky.app/profile/tolkoto.com",
-				"https://venturebeat.com/author/mike-minotti/"
+				"https://gamesbeat.com/author/tolkoto/"
 			]
 		},
 		{
