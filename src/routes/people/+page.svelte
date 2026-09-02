@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { base } from '$app/paths'
-	import Icon, { IconType } from '$lib/components/Icon.svelte'
+	import Icon, { IconType, iconForUrl } from '$lib/components/Icon.svelte'
 	import { prettyUrl } from '$lib/text'
 	import logoBw from '$lib/images/logo-bw.png'
-	import type { People } from '$lib/data'
+	import type { Person } from '$lib/data'
 	import type { PageData } from './$types'
 
 	interface Props {
@@ -12,24 +12,6 @@
 
 	const { data }: Props = $props()
 	const people = $derived(data.people)
-
-	function icon(url: string): IconType {
-		const hostname = new URL(url).hostname
-
-		switch (hostname) {
-			case 'bsky.app':
-				return IconType.Bluesky
-			case 'mastodon.social':
-			case 'social.davesnider.com':
-				return IconType.Mastodon
-			case 'www.patreon.com':
-				return IconType.Patreon
-			case 'www.twitch.tv':
-				return IconType.Twitch
-			default:
-				return IconType.Website
-		}
-	}
 </script>
 
 <div class="container">
@@ -40,22 +22,30 @@
 	<section>
 		<h1 class="sr-only">Alumni</h1>
 		<ul class="people">
-			{#each people.alumni as person}
+			{#each people as person}
 				<li>
 					<div class="image">
 						<img
 							src={person.image ? `${base}/assets/people/${person.image}` : logoBw}
-							alt=""
+							alt="Photo of {person.name}"
 						/>
 					</div>
 					<div class="info">
 						<h2>{person.name}</h2>
 						{#if person.links}
 							<ul class="links">
+								{#if person.videos.length}
+									<li>
+										<a href={`${base}/people/${person.id}`}>
+											<Icon type={IconType.Play} />
+											{person.videos.length} Videos
+										</a>
+									</li>
+								{/if}
 								{#each person.links as link}
 									<li>
 										<a href={link}>
-											<Icon type={icon(link)} />
+											<Icon type={iconForUrl(link)} />
 											{prettyUrl(link)}
 										</a>
 									</li>
@@ -63,22 +53,6 @@
 							</ul>
 						{/if}
 					</div>
-				</li>
-			{/each}
-		</ul>
-	</section>
-
-	<section>
-		<h1>In Memoriam</h1>
-		<ul class="in-memoriam">
-			{#each people.inMemoriam as person}
-				<li>
-					<img
-						src={person.image ? `${base}/assets/people/${person.image}` : logoBw}
-						alt=""
-					/>
-					<h2>{person.name}</h2>
-					<p>{person.years}</p>
 				</li>
 			{/each}
 		</ul>
@@ -121,6 +95,7 @@
 
 	h2 {
 		font-size: 24px;
+		line-height: 24px;
 		margin: 0;
 	}
 
@@ -149,17 +124,6 @@
 		list-style: none;
 		margin: 0;
 		padding: 0;
-	}
-
-	ul.in-memoriam {
-		margin: 3em 0;
-		text-align: center;
-	}
-
-	ul.in-memoriam img {
-		border-radius: 50%;
-		max-width: 300px;
-		margin-bottom: 1em;
 	}
 
 	ul.links {

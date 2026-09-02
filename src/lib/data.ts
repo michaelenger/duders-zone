@@ -15,6 +15,7 @@ export interface Person {
 	readonly name: string
 	readonly image: string
 	readonly links: readonly string[]
+	readonly videos: string[]
 }
 
 export interface InMemoriam {
@@ -22,11 +23,6 @@ export interface InMemoriam {
 	readonly name: string
 	readonly years: string
 	readonly image: string
-}
-
-export interface People {
-	readonly alumni: Person[]
-	readonly inMemoriam: InMemoriam[]
 }
 
 export interface Show {
@@ -46,6 +42,7 @@ export interface Video {
 	readonly show?: string
 	readonly thumbnail?: string
 	readonly duration: string
+	readonly hosts: readonly Person[]
 	readonly source: {
 		readonly internetarchive?: string
 		readonly direct?: string
@@ -94,36 +91,22 @@ function formatDuration(duration: number | null): string {
 
 // Data store which contains the data for the app.
 export class DataStore {
-	readonly people: People
+	readonly people: { [key: string]: Person }
 	readonly shows: { [key: string]: Show }
 	readonly videos: { [key: string]: Video }
 	readonly videoIndex: Map<string, Map<string, number>>
 
 	// Construct the datastore based on given show and video data.
-	constructor(peopleData: any, showData: any[], videoData: any[]) {
-		let alumni = []
-		for (const person of peopleData.alumni) {
-			alumni.push({
+	constructor(peopleData: any[], showData: any[], videoData: any[]) {
+		this.people = {}
+		for (const person of peopleData) {
+			this.people[person.id] = {
 				id: person.id,
 				name: person.name,
 				image: person.image,
 				links: person.links,
-			})
-		}
-
-		let inMemoriam = []
-		for (const person of peopleData.in_memoriam) {
-			inMemoriam.push({
-				id: person.id,
-				name: person.name,
-				years: person.years,
-				image: person.image,
-			})
-		}
-
-		this.people = {
-			alumni: alumni.sort(byNameAsc),
-			inMemoriam: inMemoriam.sort(byNameAsc),
+				videos: [],
+			}
 		}
 
 		this.shows = {}
@@ -140,6 +123,17 @@ export class DataStore {
 
 		this.videos = {}
 		for (const video of videoData) {
+			const hosts = []
+
+			for (const host of video.hosts) {
+				const person = peopleData.find((person) => person.name == host)
+				if (!person) {
+					continue
+				}
+
+				hosts.push(person)
+			}
+
 			this.videos[video.id] = {
 				id: video.id,
 				title: video.title,
@@ -148,10 +142,14 @@ export class DataStore {
 				show: video.show,
 				thumbnail: video.thumbnail,
 				duration: formatDuration(video.duration),
+				hosts,
 				source: video.source,
 			}
 
 			this.shows[video.show].videos.push(video.id)
+			for (const host of hosts) {
+				this.people[host.id].videos.push(video.id)
+			}
 		}
 
 		this.videoIndex = new Map()
@@ -179,12 +177,14 @@ export class DataStore {
 	}
 
 	// Return the people.
-	getPeople(): People {
+	getPeople(): Person[] {
 		// Return copies so the data source cannot be modified
-		return {
-			alumni: Array.from(this.people.alumni),
-			inMemoriam: Array.from(this.people.inMemoriam),
-		}
+		return structuredClone(Object.values(this.people))
+	}
+
+	// Return the people.
+	getPersonById(id: string): Person | null {
+		return id in this.people ? this.people[id] : null
 	}
 
 	// Get a random show.
@@ -236,6 +236,11 @@ export class DataStore {
 		return Object.values(this.videos)
 			.filter((video) => video.date.getDate() == date && video.date.getMonth() == month)
 			.sort(byDateDesc)
+	}
+
+	// Get videos for a specific person.
+	getVideosForPerson(person: Person): Video[] {
+		return person.videos.map((videoId) => this.videos[videoId]).sort(byDateDesc)
 	}
 
 	// Get videos for a specific show.

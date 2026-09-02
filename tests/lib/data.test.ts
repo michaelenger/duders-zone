@@ -3,24 +3,20 @@ import { describe, it, expect } from 'vitest'
 import { DataStore } from '$lib/data'
 import type { Video } from '$lib/data'
 
-const testPeopleData = {
-	alumni: [
-		{
-			id: 'jeff',
-			name: 'Jeff Gerstmann',
-			image: 'jeffge.jpg',
-			links: ['https://www.patreon.com/jeffgerstmann', 'https://twitter.com/jeffgerstmann'],
-		},
-	],
-	in_memoriam: [
-		{
-			id: 'ryan',
-			name: 'Ryan Davis',
-			years: '1979–2013',
-			image: 'ryan.png',
-		},
-	],
-}
+const testPeopleData = [
+	{
+		id: 'jeff',
+		name: 'Jeff Gerstmann',
+		image: 'jeffge.jpg',
+		links: ['https://www.patreon.com/jeffgerstmann', 'https://twitter.com/jeffgerstmann'],
+	},
+	{
+		id: 'ryan',
+		name: 'Ryan Davis',
+		image: 'ryan.png',
+		links: [],
+	},
+]
 const testShowData = [
 	{
 		id: 'this-aint-no-game',
@@ -49,6 +45,7 @@ const testVideoData = [
 		date: '2020-03-02T00:00:00Z',
 		thumbnail: 'https://archive.org/services/img/gb-2300-15259-IDJIYS2',
 		duration: 7300,
+		hosts: [],
 		source: {
 			internetarchive: 'gb-2300-15259-IDJIYS2',
 		},
@@ -62,6 +59,7 @@ const testVideoData = [
 		date: '2020-11-25T00:00:00Z',
 		thumbnail: 'https://archive.org/services/img/gb-2300-16398-IDJKE0C',
 		duration: 7925,
+		hosts: [],
 		source: {
 			internetarchive: 'gb-2300-16398-IDJKE0C',
 		},
@@ -75,6 +73,7 @@ const testVideoData = [
 		thumbnail:
 			'https://archive.org/services/img/2009-02-11-This_Aint_No_Game-This_Aint_No_Game_Double_Dragon-IDBF5DWY',
 		duration: 1,
+		hosts: ['Ryan Davis'],
 		source: {
 			internetarchive: 'IDBF5DWY',
 		},
@@ -89,6 +88,7 @@ const testVideoData = [
 		thumbnail:
 			'https://archive.org/services/img/2009-02-19-This_Aint_No_Game-This_Aint_No_Game_Street_Fighter-IDIAQF2N',
 		duration: null,
+		hosts: ['Ryan Davis'],
 		source: {
 			internetarchive: 'IDIAQF2N',
 		},
@@ -102,6 +102,7 @@ const testVideoData = [
 		thumbnail:
 			'https://archive.org/services/img/2009-02-26-This_Aint_No_Game-This_Aint_No_Game_Resident_Evil-IDB90NXY',
 		duration: null,
+		hosts: ['Ryan Davis'],
 		source: {
 			internetarchive: 'IDB90NXY',
 		},
@@ -112,25 +113,23 @@ describe('DataStore', () => {
 	describe('constructor', () => {
 		it('creates a DataStore based on person, video, and show data', () => {
 			const expectedPeople = {
-				alumni: [
-					{
-						id: 'jeff',
-						name: 'Jeff Gerstmann',
-						image: 'jeffge.jpg',
-						links: [
-							'https://www.patreon.com/jeffgerstmann',
-							'https://twitter.com/jeffgerstmann',
-						],
-					},
-				],
-				inMemoriam: [
-					{
-						id: 'ryan',
-						name: 'Ryan Davis',
-						years: '1979–2013',
-						image: 'ryan.png',
-					},
-				],
+				jeff: {
+					id: 'jeff',
+					name: 'Jeff Gerstmann',
+					image: 'jeffge.jpg',
+					links: [
+						'https://www.patreon.com/jeffgerstmann',
+						'https://twitter.com/jeffgerstmann',
+					],
+					videos: [],
+				},
+				ryan: {
+					id: 'ryan',
+					name: 'Ryan Davis',
+					image: 'ryan.png',
+					links: [],
+					videos: ['IDBF5DWY', 'IDIAQF2N', 'IDB90NXY'],
+				},
 			}
 			const expectedShows = {
 				'cross-coast': {
@@ -159,6 +158,7 @@ describe('DataStore', () => {
 					date: new Date('2020-03-02T00:00:00Z'),
 					thumbnail: 'https://archive.org/services/img/gb-2300-15259-IDJIYS2',
 					duration: '02:01:40',
+					hosts: [],
 					show: 'cross-coast',
 					source: {
 						internetarchive: 'gb-2300-15259-IDJIYS2',
@@ -172,6 +172,7 @@ describe('DataStore', () => {
 					date: new Date('2020-11-25T00:00:00Z'),
 					thumbnail: 'https://archive.org/services/img/gb-2300-16398-IDJKE0C',
 					duration: '02:12:05',
+					hosts: [],
 					show: 'cross-coast',
 					source: {
 						internetarchive: 'gb-2300-16398-IDJKE0C',
@@ -186,6 +187,14 @@ describe('DataStore', () => {
 					thumbnail:
 						'https://archive.org/services/img/2009-02-11-This_Aint_No_Game-This_Aint_No_Game_Double_Dragon-IDBF5DWY',
 					duration: '00:00:01',
+					hosts: [
+						{
+							id: 'ryan',
+							name: 'Ryan Davis',
+							image: 'ryan.png',
+							links: [],
+						},
+					],
 					show: 'this-aint-no-game',
 					source: {
 						internetarchive: 'IDBF5DWY',
@@ -200,6 +209,14 @@ describe('DataStore', () => {
 					thumbnail:
 						'https://archive.org/services/img/2009-02-19-This_Aint_No_Game-This_Aint_No_Game_Street_Fighter-IDIAQF2N',
 					duration: '--:--:--',
+					hosts: [
+						{
+							id: 'ryan',
+							name: 'Ryan Davis',
+							image: 'ryan.png',
+							links: [],
+						},
+					],
 					show: 'this-aint-no-game',
 					source: {
 						internetarchive: 'IDIAQF2N',
@@ -213,6 +230,14 @@ describe('DataStore', () => {
 					thumbnail:
 						'https://archive.org/services/img/2009-02-26-This_Aint_No_Game-This_Aint_No_Game_Resident_Evil-IDB90NXY',
 					duration: '--:--:--',
+					hosts: [
+						{
+							id: 'ryan',
+							name: 'Ryan Davis',
+							image: 'ryan.png',
+							links: [],
+						},
+					],
 					show: 'this-aint-no-game',
 					source: {
 						internetarchive: 'IDB90NXY',
@@ -611,6 +636,7 @@ describe('DataStore', () => {
 					description: '',
 					date: '2020-03-02T00:00:00Z',
 					thumbnail: null,
+					hosts: [],
 				},
 				{
 					id: 'exact',
@@ -619,6 +645,7 @@ describe('DataStore', () => {
 					description: '',
 					date: '2020-03-02T00:00:00Z',
 					thumbnail: null,
+					hosts: [],
 				},
 				{
 					id: 'not_included',
@@ -627,6 +654,7 @@ describe('DataStore', () => {
 					description: '',
 					date: '2020-03-02T00:00:00Z',
 					thumbnail: null,
+					hosts: [],
 				},
 			]
 
@@ -645,6 +673,7 @@ describe('DataStore', () => {
 					description: '',
 					date: '2020-03-02T00:00:00Z',
 					thumbnail: null,
+					hosts: [],
 				},
 				{
 					id: 'two',
@@ -653,6 +682,7 @@ describe('DataStore', () => {
 					description: '',
 					date: '2020-03-02T00:00:00Z',
 					thumbnail: null,
+					hosts: [],
 				},
 				{
 					id: 'none',
@@ -661,6 +691,7 @@ describe('DataStore', () => {
 					description: '',
 					date: '2020-03-02T00:00:00Z',
 					thumbnail: null,
+					hosts: [],
 				},
 			]
 
